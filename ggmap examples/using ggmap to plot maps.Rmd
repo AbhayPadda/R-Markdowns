@@ -1,0 +1,88 @@
+---
+title: "Plotting on maps using ggmaps"
+author: "Abhay Padda"
+date: "14 August 2017"
+output: word_document
+---
+
+# Introduction
+
+The objective is to explore *'ggmap'* package in R and use this package to plot points on the map. For this post, I'll be using the map of India. Initially, I'll try to explain some of the basic functions in *ggmap* and then I'll explain by plotting different airports in India. Let's start..
+
+### Load the libraries
+```{r}
+library(ggmap)
+
+## I am also loading ggplot2 with ggmap as ggmap() returns a ggplot object and we can use this object to apply all of the ggplot functions
+library(ggplot2)
+```
+## Get map of India and plot it
+*get_map* is a smart wrapper that queries the Google Maps, OpenStreetMap, Stamen Maps or Naver Map servers for a map. In this post, I've used google as the default source.
+```{r}
+map <- get_map(location = 'India', zoom = 4)
+
+```
+
+## Understanding Basic Map Types available in get_map *map_type* option
+```{r}
+## Basic Map type
+ggmap(map)
+
+## I've used zoom value 10 for subsequent charts to make it easier to understand the difference in the output
+## Roadmap 
+roadmap <- get_map("India", maptype='roadmap', zoom = 10)
+ggmap(roadmap)
+
+## Hybrid
+hybird <- get_map("India", maptype='hybrid', zoom = 10)
+ggmap(hybird)
+
+## Satellite
+satellite <- get_map("India", maptype='satellite', zoom = 10)
+ggmap(satellite)
+
+## Terrain
+terrain <- get_map("India", maptype='terrain', zoom = 10)
+ggmap(terrain)
+
+```
+
+## Using latitude and Longitude data to plot points on the map
+
+Load the data file. The dataset is available here: https://data.humdata.org/dataset/ourairports-ind
+```{r}
+airports <- read.csv("C://Users//Abhay//Desktop//in-airports.csv", header=T)
+
+## Listing out first few rows
+head(airports)
+
+## I'll be using latitude_deg and longitude_deg columns to plot the points on the map
+## geom_point() is a ggplot2 function and it plots the points on the top of the map
+points <- ggmap(map) + geom_point(aes(x = longitude_deg, y = latitude_deg), data = airports, alpha = .5)
+
+points
+```
+
+### Varying the size of the points depending upon the elevation of the airport
+```{r}
+variablePoints <- ggmap(map) + geom_point(aes(x = longitude_deg, y = latitude_deg, size = elevation_ft), data = airports, alpha = .5)
+
+## Modify the legend name
+updatedMap <- variablePoints + scale_size_area(name = "Elevation Level (in feet)")
+
+updatedMap
+```
+
+## qmplot()
+Another way to quickly plot a map is by using qmplot(). It automatically downloads the map based on values passed and plot the points on the map.
+```{r}
+qmplot(longitude_deg, latitude_deg, data=airports)
+```
+
+We can further use gplot2 functions on the object returned by ggmap() to modify the points to suit our requirements. 
+
+
+
+
+
+
