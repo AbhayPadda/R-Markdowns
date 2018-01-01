@@ -1,0 +1,91 @@
+---
+title: "credit card fraud"
+author: "Abhay Padda"
+date: "9 December 2017"
+output: html_document
+---
+
+## In this markdown, I've used German credit card dataset and used SMOTE to handle class imbalance and then I've used Logistic and Random Forest to predict if the probability of fraud.
+
+### The datasets contain transactions made by credit cards in September 2013 by European cardholders. This dataset presents transactions that occurred in two days, where we have 492 frauds out of 284,807 transactions. The dataset is highly unbalanced, the positive class (frauds) account for 0.172% of all transactions
+[Dataset link](https://www.kaggle.com/dalpozz/creditcardfraud)
+
+```{r message=FALSE, warning=FALSE}
+x <- read.csv("E:\\Papers\\creditcard.csv", sep = ",")
+
+set.seed(1029)
+## Remove rows that do not have target variable values
+final <- x[!(is.na(x$Class)),]
+
+final$Class <- factor(final$Class)
+
+library(caTools)
+
+split <- sample.split(final$Class, SplitRatio = 0.75)
+
+dresstrain <- subset(final, split == TRUE)
+dresstest <- subset(final, split == FALSE)
+
+
+## Let's check the count of unique value in the target variable
+as.data.frame(table(dresstrain$Class))
+
+## Loading DMwr to balance the unbalanced class
+library(DMwR)
+
+## Smote : Synthetic Minority Oversampling Technique To Handle Class Imbalancy In Binary Classification
+balanced.data <- SMOTE(Class ~., dresstrain, perc.over = 4800, k = 5, perc.under = 1000)
+
+as.data.frame(table(balanced.data$Class))
+
+```
+
+## Logistic Regression
+
+```{r message=FALSE, warning=FALSE}
+library(caret)  
+
+model <- glm (Class~., data=balanced.data, family = binomial)
+summary(model)
+
+## Predict the Values
+predict <- predict(model, dresstest, type = 'response')
+
+## Create Confusion Matrix
+table(dresstest$Class, predict > 0.5)
+
+#ROCR Curve
+library(ROCR)
+ROCRpred <- prediction(predict, dresstest$Class)
+ROCRperf <- performance(ROCRpred, 'tpr','fpr')
+plot(ROCRperf, colorize = TRUE, text.adj = c(-0.2,1.7))
+
+```
+
+## Random FOrest
+
+```{r message=FALSE, warning=FALSE}
+
+library(randomForest)  
+library(e1071)  
+
+
+rf = randomForest(Class~.,  
+                   ntree = 100,
+                   data = balanced.data)
+plot(rf) 
+
+varImp(rf)
+
+## Important variables according to the model
+varImpPlot(rf,  
+           sort = T,
+           n.var=25,
+           main="Variable Importance")
+
+predicted.response <- predict(rf, dresstest)
+
+
+confusionMatrix(data=predicted.response,  
+                reference=dresstest$Class)
+```
