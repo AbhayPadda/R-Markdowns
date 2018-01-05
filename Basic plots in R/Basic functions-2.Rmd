@@ -1,0 +1,155 @@
+---
+title: "Basic functions and operations in R"
+author: "Abhay Padda"
+date: "8 January 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+```{R Load Data}
+# Load the libraries
+library(dplyr)
+library(ggplot2)
+
+# Read the CSV file
+data <- read.csv('C:/Users/Abhay/Desktop/1.csv')
+
+# Take a sample of first 627 rows (clean data)
+data <- data[1:627,]
+
+```
+
+```{r }
+## Data Summary
+## Data Distribution
+# check data dimensions and the summary of the data
+dim(data)
+summary(data)
+
+# summary of PRSM scores
+summary(data$PRSM)
+
+# Remove the outlier from the data
+data <- data[-527, ]
+
+prsmScores <- data$PRSM
+summary(prsmScores)
+
+```
+
+```{r Stem and Leaf Plot}
+
+stem(prsmScores,scale = 2)
+
+```
+
+```{r }
+## Histograms
+h <- hist(prsmScores, 
+     main="Histogram for PRSM Scores", 
+     xlab="PRSM Score", 
+     border="black", 
+     col="blue",
+     las=1, 
+     breaks=7)
+
+```
+
+```{r }
+## Density Function
+d <- density(prsmScores)
+
+```
+
+```{r }
+## Density functions to draw a graph
+plot(d, main="Density of PRSM Scores")
+polygon(d, col='red', border = 'blue')
+
+```
+
+```{r }
+## Adding Density Lines to Existing Graphs
+plot(h)
+xfit<-seq(min(prsmScores),max(prsmScores),length=20) 
+yfit<-dnorm(xfit,mean=mean(prsmScores),sd=sd(prsmScores)) 
+yfit <- yfit*diff(h$mids[1:2])*length(prsmScores) 
+lines(xfit, yfit, col="red", lwd=2)
+
+```
+
+```{r }
+## Types of Data Distributions
+prsmMean <- mean(prsmScores)
+prsmSD<- sd(prsmScores)
+
+pnorm(1, mean=prsmMean, sd=prsmSD)
+qnorm(0.5, mean=prsmMean, sd=prsmSD)
+rnorm(10, mean=prsmMean, sd=prsmSD)
+dnorm(prsmScores, mean=prsmMean, sd=prsmSD)
+```
+
+```{r}
+## Normal Distribution
+dt.norm <- rnorm(1000,mean(data$PRSM),sd(data$PRSM))
+hist(dt.norm, freq = F, border = 'gray50', main = 'Comparing two distributions', xlab = 'Data size classes')
+lines(density(data$PRSM), lwd = 2)
+
+```
+
+```{r}
+## Other distributions
+# Poisson Distribution
+dt.pois <- rpois(50, lambda = 1.5) 
+plot(dt.pois, type = 'l')
+
+```
+
+```{r}
+# Binomial Distribution
+dt.binom <- pbinom(c(3, 6, 9, 12), size = 17, prob = 0.5) 
+plot(dt.binom, type = 'l')
+
+# Uniform Distribution
+plot(runif(10, min = 0, max = 10), type = 'l') 
+```
+
+```{r}
+# Random Number Generation and Control
+set.seed(10, kind = 'Super')
+runif(10)
+set.seed(10,kind = 'default')
+runif(10)
+
+```
+
+
+```{r}
+# Random Numbers and Sampling
+set.seed(10)
+x <- sample(prsmScores, size = 200, replace = FALSE)
+
+# Shapiro-Wilk Test for Normality
+shapiro.test(prsmScores)
+
+# Kolmogorov-Smirnov Test
+ks.test(prsmScores, pnorm(1000, 20, 5))
+
+# A Basic Normal Quantile-Quantile Plot
+qqnorm(prsmScores)
+
+# Adding a straight line to a QQ Plot
+qqnorm(prsmScores, main = 'QQ plot of PRSM data', xlab = 'Theoretical',ylab = 'Quantiles for dataset')
+qqline(prsmScores, lwd = 2, lty = 2)
+
+# Plotting the distribution of one sample against another
+qqp = qqplot(prsmScores, rnorm(50, 5, 2))
+abline(lm(qqp$y ~ qqp$x))
+```
+
+
+
