@@ -1,0 +1,90 @@
+---
+title: "Basic functions and operations on data in R"
+author: "Abhay Padda"
+date: "7 January 2017"
+output: html_document
+---
+## Basic functions and operations in R
+
+```{r}
+# Load the libraries
+library(dplyr)
+library(ggplot2)
+library(fBasics)
+
+# Read the CSV file
+data <- read.csv('C:/Users/Abhay/Desktop/1.csv')
+
+## Show data
+head(data)
+
+# Read the training set and remove the outliers
+data <- data[1:628,]
+data <- data[-527,]
+
+# Check if the data follows a normal distribution
+qqnormPlot(data$Nominal.Loan.Amount)
+qqnormPlot(data$Total.Amt.to.be.Repaid)
+
+# Using the Student's t-test
+t.test(data$Nominal.Loan.Amount, data$Total.Amt.to.be.Repaid)
+
+# Two sample t-test with Unequal Variance
+t.test(data$Nominal.Loan.Amount, data$Total.Amt.to.be.Repaid, var.equal = FALSE)
+
+# Two sample t-test with Equal Variance
+t.test(data$Nominal.Loan.Amount, data$Total.Amt.to.be.Repaid, var.equal = TRUE)
+
+# One sample t-testing
+t.test(data$PRSM, mu=1.5)
+
+# Using Directional Hypothesis
+t.test(data$PRSM, mu=1.5, alternative='less')
+
+# The Wilcoxon U-Test (Mann-Whitney)
+sample.1 <- sample(data$PRSM, size = 200)
+sample.2 <- sample(data$PRSM, size = 200)
+wilcox.test(sample.1, sample.2)
+
+# Two sample U test
+wilcox.test(sample.1, sample.2)
+
+# One sample U-test
+wilcox.test(sample.1, exact = FALSE)
+
+# using directional hypothesis
+wilcox.test(sample.1, mu = 8, exact = FALSE, conf.int = TRUE, alt = 'less')
+
+# formula syntax and subsetting samples in the U test
+sample.3 <- sample(data$Amt.Repaid.at.6.Months, size = 200)
+sample.4 <- sample(data$Amt.Repaid.at.6.Months, size = 200)
+
+# Paired t and u tests
+wilcox.test(sample.2, sample.1, exact = FALSE, paired = TRUE)
+
+# Correlation and Covariance
+cor.test(data$PRSM,data$Total.Amt.to.be.Repaid)
+
+# Simple correlation
+cor(data$PRSM, data$Total.Amt.to.be.Repaid, method='spearman')
+
+# Covariance
+cov(sample.1,sample.2)
+
+# significance testing in correlation tests
+cor.test(sample.1,sample.2)
+
+# Tests for Association
+# Multiple categories Chi square test
+chisq.test(data$PRSM)
+
+# Monte Carlo Simulation
+chisq.test(data$PRSM, simulate.p.value = TRUE, B = 2500)
+
+# Yates correction for 2 n 2 tables
+chisq.test(data$PRSM, correct = TRUE)
+
+# Single Category Goodness of Fit tests
+chisq.test(sample.1, p=sample.2, rescale.p=T)
+```
+
