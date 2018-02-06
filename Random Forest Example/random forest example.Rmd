@@ -1,0 +1,58 @@
+---
+title: "Random Forest Example"
+author: "Abhay Padda"
+date: "26 January 2018"
+output: html_document
+---
+
+
+```{r Read File Contents}
+
+x <- read.csv("E:\\Abhay MBA Docs\\TERM 5\\Subjects\\Analytics Practicum\\UCI_Credit_Card.csv", sep = ",")
+
+## Remove rows that do not have target variable values
+final <- x[!(is.na(x$default.payment.next.month)),]
+
+```
+
+```{r Split the data}
+
+library(caTools)
+library(caret)
+
+set.seed(88)
+split <- sample.split(final$default.payment.next.month, SplitRatio = 0.75)
+
+dresstrain <- subset(final, split == TRUE)
+dresstest <- subset(final, split == FALSE)
+
+```
+
+```{r Random Forest}
+
+library(randomForest)  
+library(e1071)  
+
+dresstrain$default.payment.next.month <- as.factor(dresstrain$default.payment.next.month)
+dresstest$default.payment.next.month <- as.factor(dresstest$default.payment.next.month)
+
+rf = randomForest(default.payment.next.month~.,  
+                   ntree = 100,
+                   data = dresstrain)
+plot(rf) 
+
+varImp(rf)
+
+## Important variables according to the model
+varImpPlot(rf,  
+           sort = T,
+           n.var=25,
+           main="Variable Importance")
+
+predicted.response <- predict(rf, dresstest)
+
+
+confusionMatrix(data=predicted.response,  
+                reference=dresstest$default.payment.next.month)
+
+```
