@@ -1,0 +1,1 @@
+Simple code in R to perform Logistic Regression in R on famous Titanic dataset. Deatiled explanation of the code and how logistic regression works can be found here: https://analyticsdefined.com/implementing-logistic-regression-using-titanic-dataset-r/
