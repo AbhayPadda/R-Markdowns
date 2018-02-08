@@ -1,0 +1,59 @@
+---
+title: "Linear Optimization Using R"
+author: "Abhay Padda"
+date: "8 February 2018"
+output:
+  word_document: default
+  html_document: default
+---
+# Linear Optimization Problem
+#### A company wants to maximize the profit for two products A and B which are sold at $ 25 and $ 20 respectively. There are 1800 resource units available every day and product A requires 20 units while B requires 12 units. Both of these products require a production time of 4 minutes and total available working hours are 8 in a day. What should be the production quantity for each of the products to maximize profits.
+
+### The objective function in the above problem will be:
+
+#### max(Sales) = max(25 x1 + 20 x2)
+
+#### where,
+#### x1 is the units of Product A produced
+#### x2 is the units of Product B produced
+#### x1 and x2 are also called the decision variables
+
+### The constraints (resource and time) in the problem:
+
+#### 20x1 + 12 x2 <= 1800 (Resource Constraint)
+#### 4x1 + 4x2 <= 8*60 (Time constraint)
+```{r}
+## Load the package lpsolve
+library(lpSolve)
+
+## Set the coefficients of the decision variables
+objective.in  <- c(25,  20)
+
+## Create constraint martix
+const.mat <- matrix(c(20,  12,  4,  4),  nrow=2, byrow=TRUE)
+
+## define constraints
+time_constraint <- (8*60)
+resource_constraint <- 1800
+
+## RHS for the constraints
+const.rhs <- c(resource_constraint, time_constraint)
+
+## Constraints direction
+const.dir  <- c("<=",  "<=")
+
+## Find the optimal solution
+optimum <-  lp(direction="max",  objective.in, const.mat, const.dir,  const.rhs)
+```
+
+```{r}
+## Display the optimum values for x1 and x2
+optimum$solution
+
+## Check the value of objective function at optimal point
+optimum$objval
+
+```
+
+#### From the above output, we can see that the company should produce 45 units of Product A and 75 units of Product B to get sales of $2625, which is the maximum sales that company can get given the constraints.
+
