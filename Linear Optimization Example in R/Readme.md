@@ -1,0 +1,1 @@
+This has a simple program in R with an example to show how linear optimization problems can be solved in R using 'lpSolve()'. For detailed explanation, please read here: https://analyticsdefined.com/linear-optimization-problem-using-r/ 
