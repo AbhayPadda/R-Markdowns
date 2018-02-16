@@ -1,0 +1,125 @@
+---
+title: "Regression Techniques on House Prices dataset"
+author: "Abhay Padda"
+date: "10 February 2018"
+output:
+  html_document:
+    df_print: paged
+  word_document: default
+---
+
+```{r echo=FALSE}
+train <- read.csv("E:\\Hackathon\\Analytics Vidhya\\data tales\\train.csv", sep = ",")
+test <- read.csv("E:\\Hackathon\\Analytics Vidhya\\data tales\\test.csv", sep = ",")
+
+```
+
+```{r warning=FALSE, message=FALSE}
+library(zoo)
+library(lubridate)
+
+head(train)
+
+cleanData <- function(data, trainData=TRUE) {
+  if (trainData) {
+    data$SALES_PRICE <- log(train$SALES_PRICE)
+  }
+  
+}
+
+hist(train$SALES_PRICE)
+hist(log(train$SALES_PRICE))
+
+train$SALES_PRICE <- log(train$SALES_PRICE)
+
+train$N_ROOM <- as.factor(train$N_ROOM)
+train$N_BATHROOM <- as.factor(train$N_BATHROOM)
+train$N_BEDROOM <- as.factor(train$N_BEDROOM)
+
+train$PROPERTY_AGE <- (as.yearmon(strptime("11.01.2018", format = "%d.%m.%Y"))-
+          as.yearmon(strptime(train$DATE_BUILD, format = "%d-%m-%Y")))
+train$SALE_YEAR <- as.factor(substring(train$DATE_SALE,7,10))
+
+cleaned_data <- subset(train, select = -c(PRT_ID, DATE_BUILD, DATE_SALE))
+
+feature_classes <- sapply(names(cleaned_data),function(x){class(cleaned_data[[x]])})
+numeric_feats <-names(feature_classes[feature_classes != "factor"]) 
+
+library(moments)
+skewed_feats <- sapply(numeric_feats,function(x){skewness(cleaned_data[[x]],na.rm=TRUE)})
+
+skewed_feats <- sapply(numeric_feats,function(x){skewness(cleaned_data[[x]],na.rm=TRUE)})
+skewed_feats <- skewed_feats[skewed_feats > 0.75]
+
+for(x in names(skewed_feats)) {
+  cleaned_data[[x]] <- log(cleaned_data[[x]] + 1)
+}
+
+categorical_feats <- names(feature_classes[feature_classes == "factor"])
+
+sapply(cleaned_data, function(x) sum(is.na(x)))
+
+Mode <- function (x, na.rm) {
+    xtab <- table(x)
+    xmode <- names(which(xtab == max(xtab)))
+    if (length(xmode) > 1) xmode <- ">1 mode"
+    return(xmode)
+}
+
+for (var in 1:ncol(cleaned_data)) {
+    if (class(cleaned_data[,var])=="numeric") {
+        cleaned_data[is.na(cleaned_data[,var]),var] <- mean(cleaned_data[,var], na.rm = TRUE)
+    } else if (class(cleaned_data[,var]) %in% c("character", "factor")) {
+        cleaned_data[is.na(cleaned_data[,var]),var] <- Mode(cleaned_data[,var], na.rm = TRUE)
+    }
+}
+
+sapply(cleaned_data, function(x) sum(is.na(x)))
+
+library(caret)
+dummies <- dummyVars(~.,cleaned_data[categorical_feats])
+categorical_1_hot <- predict(dummies,cleaned_data[categorical_feats])
+
+final <- cbind(cleaned_data[numeric_feats],categorical_1_hot)
+
+
+```
+
+```{r warning=FALSE}
+
+x<- subset(final,select= -SALES_PRICE)
+y <- final$SALES_PRICE
+
+```
+
+```{r warning=FALSE}
+CARET.TRAIN.CTRL <- trainControl(method="repeatedcv", number=5, repeats=5, returnResamp="final", verboseIter=FALSE)
+
+## LINEAR REGRESSION
+model_linear <- train(SALES_PRICE~.,final,method="lm",metric="RMSE",maximize=FALSE,trControl=CARET.TRAIN.CTRL)
+summary(model_linear) 
+mean(model_linear$resample$RMSE)
+
+
+## RIDGE REGRESSION
+set.seed(123) # for reproducibility
+model_ridge <- train(x=x,y=y, method="glmnet", metric="RMSE",maximize=FALSE,trControl=CARET.TRAIN.CTRL,tuneGrid=expand.grid(alpha=0, lambda=0.039)) #alpha is set to 0 for Ridge regression                                                                             
+
+mean(model_ridge$resample$RMSE)
+
+## LASSO 
+set.seed(123) # for reproducibility
+model_lasso <- train(x=x,y=y,
+method="glmnet",
+metric="RMSE",
+maximize=FALSE,
+trControl=CARET.TRAIN.CTRL,
+tuneGrid=expand.grid(alpha=1,lambda=0.01))  # alpha is set to 1 for Lasso regression
+
+model_lasso
+mean(model_lasso$resample$RMSE)
+
+```
+
+
+
