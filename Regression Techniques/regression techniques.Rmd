@@ -8,12 +8,6 @@ output:
   word_document: default
 ---
 
-```{r echo=FALSE}
-train <- read.csv("E:\\Hackathon\\Analytics Vidhya\\data tales\\train.csv", sep = ",")
-test <- read.csv("E:\\Hackathon\\Analytics Vidhya\\data tales\\test.csv", sep = ",")
-
-```
-
 ```{r warning=FALSE, message=FALSE}
 library(zoo)
 library(lubridate)
