@@ -23,10 +23,10 @@ options(httr_oauth_cache=T)
 ### Set API Keys
 ``` {r echo=FALSE}
 
-api_key <- "5HvzVjkQk0UODChhQLCMBo04m"
-api_secret <- "RbhFvyYE1xZpiTpAs1HWc0zbI9g62WaGJavNvJu957fRZgYmYv"
-access_token <- "160516034-BNjXJBamKQQEeE3THfJ88zKLXBE1CFaLnuIc35it"
-access_token_secret <- "AykvyBz9vsOAlsNhwnjh6RYKbKjw81H3JsuUuoLGacrks"
+api_key <- "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+api_secret <- "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+access_token <- "XXXXXXXXXXXXXXXXXXXXXXXXX-XXXXXXXXXXXXXXXXXXXXXXX"
+access_token_secret <- "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 
 ```
 
